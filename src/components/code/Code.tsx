@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { MONOKAI } from '../../types';
+import { MONOKAI, CodeEngineLanguage } from '../../types';
+import { Layout } from 'antd';
+const { Content } = Layout;
 
 type CodeProps = {
-  onRunCode: (code: string) => void;
+  onCodeUpdate: (code: string) => void;
+  language: CodeEngineLanguage;
 };
 
 export const Code: React.FC<CodeProps> = (props: CodeProps) => {
@@ -16,36 +19,42 @@ export const Code: React.FC<CodeProps> = (props: CodeProps) => {
 
   const onChange = (newVal: string) => {
     setCode(newVal);
-    props.onRunCode(newVal);
+    props.onCodeUpdate(newVal);
   };
 
   const editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    monaco.editor.setTheme('monokai');
+    const range = editor.getModel()?.getFullModelRange() as monaco.Range;
+    editor.focus();
+    editor.setSelection(range);
     editor.focus();
   };
 
   return (
-    <div>
+    <Content style={{ width: '100%', height: '100%' }}>
       <MonacoEditor
-        width="100vw"
-        height="70vh"
-        language="javascript"
+        width="100%"
+        height="100%"
+        language={props.language}
         theme="vs-dark"
         options={{
           minimap: {
             enabled: true,
           },
-          language: 'javascript',
+          language: props.language,
           readOnly: false,
           renderFinalNewline: true,
           renderWhitespace: 'all',
           wordWrap: 'on',
-          theme: 'monokai',
+          insertSpaces: true,
+          autoIndent: 'full',
+          tabSize: 2,
         }}
         value={code}
         editorDidMount={editorDidMount}
         onChange={onChange}
       />
-    </div>
+    </Content>
   );
 };
 
